@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-
 # connect to the database
 # cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
 # db = cxn[os.getenv("MONGO_DBNAME")]  # store a reference to the database
@@ -22,7 +21,22 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return render_template("index.html")
+@app.route("/get_tasks", methods=["GET"])
+def get_tasks():
+    ten_tasks = task_collection.find().limit(10)
+    task_list = [task for task in ten_tasks]
+    return jsonify(task_list)
 
+@app.route("/add_task", methods=["POST"])
+def add_task():
+    task_data = request.json
+    task = task_data.get("task")
+
+    if task:
+        task_collection.insert_one({"task": task})
+        return jsonify({"success": True}), 200
+    else:
+        return jsonify({"success": False, "error": "Task not provided"}), 400
 if __name__ == "__main__":
     FLASK_PORT = os.getenv("FLASK_PORT", "5000")
     app.run(port=FLASK_PORT)

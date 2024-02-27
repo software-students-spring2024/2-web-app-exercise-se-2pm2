@@ -1,5 +1,23 @@
 {
   "dependencies": {
     "mongodb": "^6.3.0"
-  }
+  },
+  "name": "2-web-app-exercise-se-2pm2",
+  "description": "A little exercise to build a web application following an agile development process. See the [instructions](instructions.md) for more detail.",
+  "version": "1.0.0",
+  "main": "calender.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/software-students-spring2024/2-web-app-exercise-se-2pm2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/software-students-spring2024/2-web-app-exercise-se-2pm2/issues"
+  },
+  "homepage": "https://github.com/software-students-spring2024/2-web-app-exercise-se-2pm2#readme"
 }

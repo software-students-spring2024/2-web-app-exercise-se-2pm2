@@ -23,7 +23,7 @@ document.getElementById("todo-form").addEventListener("submit", function(){
 });
 });
 
-async function getTask(taskInput) {
+async function getTask() {
         try {
             const response = await fetch("/get_task")
             const tasks = await response.json();
