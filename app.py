@@ -18,6 +18,14 @@ app = Flask(__name__)
 # except Exception as e:
     # print(" * MongoDB connection error:", e)  # debug
 
+@app.route('/signin')
+def signin():
+    return render_template('signin.html')
+
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
+
 @app.route("/")
 def home():
     return render_template("index.html")
