@@ -179,3 +179,24 @@ header .icons span:hover {
 .delete-event-button:hover {
     background-color: #C9302C; /* Darker shade of red on hover */
 }
+
+.wrapper input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.wrapper .search-button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    background-color: #32936F;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.wrapper .search-button:hover {
+    background-color: #276C56;
+}
