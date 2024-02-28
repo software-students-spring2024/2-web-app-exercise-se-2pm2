@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-# connect to the database
+
 cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
-db = cxn[os.getenv("MONGO_DBNAME")] 
+db = cxn[str(os.getenv("MONGO_DBNAME"))]  
 
 # the following try/except block is a way to verify that the database connection is alive (or not)
 try:
