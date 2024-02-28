@@ -143,3 +143,60 @@ header .icons span:hover {
     margin-bottom: 10px;
 }
 
+.button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.add-event-button,
+.edit-event-button {
+    padding: 10px 20px;
+    margin: 0 5px;
+    background-color: #32936F;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-event-button:hover,
+.edit-event-button:hover {
+    background-color: #276C56;
+}
+
+.delete-event-button {
+    padding: 10px 20px;
+    margin: 0 5px;
+    background-color: #D9534F; /* Red color */
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-event-button:hover {
+    background-color: #C9302C; /* Darker shade of red on hover */
+}
+
+.wrapper input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.wrapper .search-button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    background-color: #32936F;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.wrapper .search-button:hover {
+    background-color: #276C56;
+}
