@@ -8,15 +8,15 @@ load_dotenv()
 
 app = Flask(__name__)
 # connect to the database
-# cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
-# db = cxn[os.getenv("MONGO_DBNAME")]  # store a reference to the database
+cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
+db = cxn[os.getenv("MONGO_DBNAME")] 
 
 # the following try/except block is a way to verify that the database connection is alive (or not)
-# try:
-    # cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
-    # print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
-# except Exception as e:
-    # print(" * MongoDB connection error:", e)  # debug
+try:
+    cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
+    print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
+except Exception as e:
+    print(" * MongoDB connection error:", e)  
 
 @app.route('/signin')
 def signin():
