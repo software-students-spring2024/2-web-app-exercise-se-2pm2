@@ -1,82 +1,145 @@
-body {
-    font-family: Arial, sans-serif;
+
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    font-family: 'Quicksand', sans-serif;
 }
 
-header, footer {
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    padding: 10px 0;
-}
-
-.container {
+body {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #273B09;
+}
+
+.wrapper {
+    width: 450px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px; /* Add spacing between calendar and todo list */
+}
+
+.wrapper header {
+    display: flex;
+    align-items: center;
+    padding: 25px 30px 10px;
     justify-content: space-between;
+}
+
+header {
+    font-size: 1.45rem;
+    font-weight: 500;
+}
+
+header .icons span {
+    height: 38px;
+    width: 38px;
+    color: #878787;
+    font-size: 1.9rem;
+    margin: 0 1px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 38px;
+    border-radius: 50%;
+}
+
+header .icons span:last-child {
+    margin-right: -10px
+}
+
+header .icons span:hover {
+    background: #f2f2f2
+}
+
+.calendar {
+    padding: 20px;
+}
+
+.calendar ul {
+    display: flex;
+    list-style: none;
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.calendar .days {
+    margin-bottom: 20px;
+}
+
+.calendar .weeks li {
+    font-weight: 500;
+}
+
+.calendar ul li {
+    position: relative;
+    width: calc(100%/7);
+}
+
+.calendar .days li {
+    z-index: 1;
+    cursor: pointer;
+    margin-top: 30px;
+}
+
+.days li.inactive {
+    color: #aaa;
+}
+
+.days li.active {
+    color: #fff;
+}
+
+.calendar .days li::before{
+    position: absolute;
+    content: "";
+    height: 40px;
+    width: 40px;
+    top: 50%;
+    left: 50%;
+    z-index: -1;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.days li:hover::before {
+    background: #f2f2f2
+}
+
+.days li.active::before {
+    background: #32936F;
+}
+
+.days li.event::after {
+    content: "";
+    position: absolute;
+    height: 5px;
+    width: 5px;
+    background-color: red;
+    border-radius: 50%;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.todo-wrapper {
+    width: 450px; /* Adjust width as needed */
+    background: #fff;
+    border-radius: 10px;
     padding: 20px;
 }
 
 .todo-list {
-    flex: 1;
+    list-style: none;
+    padding: 20px;
 }
 
-.todo-list ul {
-    list-style-type: none;
-    padding: 0;
+.todo-list li {
+    margin-bottom: 10px;
 }
 
-.todo-list form {
-    margin-top: 20px;
-}
-
-.todo-list input[type="text"] {
-    padding: 5px;
-    width: 70%;
-}
-
-.todo-list button {
-    padding: 5px 10px;
-    background-color: #333;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-}
-
-.todo-list button:hover {
-    background-color: #555;
-}
-
-.calendar {
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.calendar h2 {
-    margin-top: 0;
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-}
-
-.day-header {
-    text-align: center;
-    font-weight: bold;
-}
-
-.day {
-    border: 1px solid #ccc;
-    padding: 5px;
-    text-align: center;
-}
-
-.event {
-    background-color: #007bff;
-    color: #fff;
-    padding: 5px;
-    border-radius: 5px;
-}
