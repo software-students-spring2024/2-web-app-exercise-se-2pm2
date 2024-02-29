@@ -44,7 +44,7 @@ def search():
      query = request.form.get('query')
      results = {}
      if query:
-         results = db.tasks.find({"$task": {"$search": query}}, {"$date": {"$search": query}})
+         results = db.tasks.find({"task": {"search": query}}, {"date": {"$search": query}})
      return render_template("search.html", results=results) 
 @app.route("/edit/<post_id>", methods=["POST"])
 def edit_task(task_id):
