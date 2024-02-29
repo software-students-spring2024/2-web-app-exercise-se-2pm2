@@ -18,12 +18,21 @@ app = Flask(__name__)
 #except Exception as e:
  #   print(" * MongoDB connection error:", e)  
 
-@app.route('/signin')
+@app.route('/signin', methods=["GET", "POST"])
 def signin():
+    if request.method == "POST":
+        print("AYYY")
     return render_template('signin.html')
 
-@app.route('/signup')
+@app.route('/signup', methods=["GET", "POST"])
 def signup():
+    if request.method == "POST":
+        username = request.form['username']
+        password = request.form["password"]
+        password2 = request.form["password2"]
+        if password != password2:
+            error_message = "Passwords do not match."
+            return render_template('signup.html', error_message=error_message)
     return render_template('signup.html')
 
 @app.route("/")
