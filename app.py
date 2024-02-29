@@ -1,15 +1,15 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for,jsonify
 import pymongo
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 
 load_dotenv()
-
+# All of the return requires further information regarding front-end design, whether a new page is created for each button or not"
 app = Flask(__name__)
 # connect to the database
-#cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
-#db = cxn[os.getenv("MONGO_DBNAME")] 
+cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
+db = cxn[os.getenv("MONGO_DBNAME")] 
 
 # the following try/except block is a way to verify that the database connection is alive (or not)
 #try:
@@ -37,20 +37,54 @@ def signup():
 
 @app.route("/")
 def home():
-    return render_template("index.html")
-@app.route("/get_tasks", methods=["GET"])
-def get_tasks():
-    ten_tasks = task_collection.find().limit(10)
-    task_list = [task for task in ten_tasks]
-    return jsonify(task_list)
-
+    tasks = db.tasks.find().limit(10)
+    docs = [task for task in tasks]
+    return render_template("index.html", docs = docs)
+@app.route("/edit/<post_id>")
+def edit(task_id):
+     doc = db.tasks.find_one({"_id": ObjectId(task_id)})
+     return render_template("edit.html", doc=doc) 
+    # return redirect(
+    #     url_for("home")
+    # ) 
+    #  change to the whateber html page for editing if not home. If home, don't mind the return redirect code
+@app.route("/search")
+def search():
+     query = request.form.get('query')
+     results = {}
+     if query:
+         results = db.tasks.find({"task": {"search": query}}, {"date": {"$search": query}})
+     return render_template("search.html", results=results) 
+@app.route("/edit/<post_id>", methods=["POST"])
+def edit_task(task_id):
+    task = request.form["task"]
+    date = request.form["date"]
+    doc = {
+        "_id": ObjectId(task_id),
+        "task": task,
+        "date": date,
+    }
+    doc = db.tasks.update_one({"_id": ObjectId(task_id)},{"$set": doc})
+    # return redirect(
+    #     url_for("home")
+    # )  
+    # change to the whateber html page for editing if not home. If home, don't mind the return redirect code
+    return render_template("edit.html", doc=doc)
+@app.route("/delete/<post_id>")
+def delete(task_id):
+    db.messages.delete_one({"_id": ObjectId(task_id)})
+    return render_template("delete.html")
+    # or
+    # return redirect(
+    #     url_for("home")
+    # ) 
 @app.route("/add_task", methods=["POST"])
 def add_task():
-    task_data = request.json
-    task = task_data.get("task")
-
-    if task:
-        task_collection.insert_one({"task": task})
+    task = request.form["task"]
+    date = request.form["date"]
+    doc = {"task":task, "date": date}
+    if task and date:
+        db.tasks.insert_one(doc)
         return jsonify({"success": True}), 200
     else:
         return jsonify({"success": False, "error": "Task not provided"}), 400
