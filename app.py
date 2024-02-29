@@ -40,7 +40,7 @@ def edit(task_id):
     # ) 
     #  change to the whateber html page for editing if not home. If home, don't mind the return redirect code
 @app.route()
-def search(task_id):
+def search():
      query = request.form.get('query')
      results = []
      if query:
