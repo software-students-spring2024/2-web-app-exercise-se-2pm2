@@ -36,6 +36,12 @@ def signup():
         if password != password2:
             error_message = "Passwords do not match."
             return render_template('signup.html', error_message=error_message)
+        if db.user_collection.find_one({'username': username}):
+            error_message = "Username is already taken."
+            return render_template('signup.html', error_message=error_message)
+        doc = {'username': username, 'password': password}
+        db.user_collection.insert_one(doc)
+        return render_template('signin.html')
     return render_template('signup.html')
 
 @app.route("/")
