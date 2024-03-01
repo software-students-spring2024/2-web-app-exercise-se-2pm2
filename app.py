@@ -1,30 +1,60 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for,jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify
+import flask
 import pymongo
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
-from flask_login import LoginManager
+import flask_login
+import datetime
 load_dotenv()
 # All of the return requires further information regarding front-end design, whether a new page is created for each button or not"
 app = Flask(__name__)
 #login
-login_manager = LoginManager()
+login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
+app.secret_key = os.getenv("SECRET_KEY")
 # connect to the database
 cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
 db = cxn[os.getenv("MONGO_DBNAME")] 
 
 # the following try/except block is a way to verify that the database connection is alive (or not)
-try:
-   cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
-   print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
-except Exception as e:
-   print(" * MongoDB connection error:", e)  
+#try:
+   #cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
+   #print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
+#except Exception as e:
+   #print(" * MongoDB connection error:", e)  
+users = {'foo@bar.tld': {'password': 'secret'}} # mock data
+class User(flask.login.UserMixin):
+    def __init__(self, username):
+        self.username = username
+    def __str__(self):
+        return self.username
+@login_manager.user_loader
+def user_loader(email):
+    if email not in users:
+        return
 
+    user = User()
+    user.id = email
+    return user
+@login_manager.request_loader
+def request_loader(request):
+    email = request.form.get('email')
+    if email not in users:
+        return
+
+    user = User()
+    user.id = email
+    return user
 @app.route('/signin', methods=["GET", "POST"])
 def signin():
     if request.method == "POST":
-        print("AYYY")
+        username = request.form['username']
+        password = request.form["password"]
+        if username in users and password == users[username][password]:
+            user = User(username)
+            flask_login.login_user(user)
+            return render_template('index.html')
     return render_template('signin.html')
 
 @app.route('/signup', methods=["GET", "POST"])
@@ -43,6 +73,12 @@ def signup():
         db.user_collection.insert_one(doc)
         return render_template('signin.html')
     return render_template('signup.html')
+
+@app.route('/logout')
+@flask_login.login_required
+def logout():
+    flask_login.logout_user()
+    return render_template('signin.html')
 
 @app.route("/")
 def home():
