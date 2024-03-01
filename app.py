@@ -15,11 +15,11 @@ cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
 db = cxn[os.getenv("MONGO_DBNAME")] 
 
 # the following try/except block is a way to verify that the database connection is alive (or not)
-#try:
- #   cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
-  #  print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
-#except Exception as e:
- #   print(" * MongoDB connection error:", e)  
+try:
+   cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
+   print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
+except Exception as e:
+   print(" * MongoDB connection error:", e)  
 
 @app.route('/signin', methods=["GET", "POST"])
 def signin():
