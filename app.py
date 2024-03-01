@@ -120,7 +120,7 @@ def edit_task(task_id):
     doc = db.tasks.update_one({"_id": ObjectId(task_id)},{"$set": doc})
     # return redirect(
     #     url_for("home")
-    # )  
+    # )  kj
     # change to the whateber html page for editing if not home. If home, don't mind the return redirect code
     return render_template("edit.html", doc=doc)
 @app.route("/delete/<post_id>")
