@@ -44,15 +44,13 @@ def edit(task_id):
     #     url_for("home")
     # ) 
     #  change to the whateber html page for editing if not home. If home, don't mind the return redirect code
-
-@app.route('/search', methods=["POST"])
-def search(task_id):
-    query = request.form.get('query')
-    results = []
-    if query:
-        results = db.tasks.find({"$text": {"$search": query}})
-    return render_template("search.html", results=results)
- 
+@app.route("/search")
+def search():
+     query = request.form.get('query')
+     results = {}
+     if query:
+         results = db.tasks.find({"task": {"search": query}}, {"date": {"$search": query}})
+     return render_template("search.html", results=results) 
 @app.route("/edit/<post_id>", methods=["POST"])
 def edit_task(task_id):
     task = request.form["task"]
