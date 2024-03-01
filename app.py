@@ -23,12 +23,14 @@ db = cxn[os.getenv("MONGO_DBNAME")]
    #print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
 #except Exception as e:
    #print(" * MongoDB connection error:", e)  
-users = {'foo@bar.tld': {'password': 'secret'}} # mock data
+users = {'username': "Minjae", 'password': "203"} # mock data
 class User(flask_login.UserMixin):
-    def __init__(self, username):
-        self.username = username
-    def __str__(self):
-        return self.username
+    pass
+    
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for('signin'))
+
 @login_manager.user_loader
 def user_loader(email):
     if email not in users:
@@ -48,13 +50,16 @@ def request_loader(request):
     return user
 @app.route('/signin', methods=["GET", "POST"])
 def signin():
+    print(request.method)
     if request.method == "POST":
         username = request.form['username']
         password = request.form["password"]
+        print(username, password)
         #search in database using find_one()
-        curr_user = db.user_collection.find({username: username})
-        if  curr_user and password == curr_user[password]:
-            user = User(username)
+        #curr_user = db.user_collection.find({username: username})
+        if  username in users['username'] and password == users['password']:
+            user = User()
+            user.id = username
             flask_login.login_user(user)
             return render_template('index.html')
     return render_template('signin.html')
@@ -83,10 +88,11 @@ def logout():
     return render_template('signin.html')
 
 @app.route("/")
+@flask_login.login_required
 def home():
-    tasks = db.tasks.find().limit(10)
-    docs = [task for task in tasks]
-    return render_template("index.html", docs = docs)
+    #tasks = db.tasks.find().limit(10)
+    #docs = [task for task in tasks]
+    return render_template("index.html")
 @app.route("/edit/<post_id>")
 def edit(task_id):
      doc = db.tasks.find_one({"_id": ObjectId(task_id)})
