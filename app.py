@@ -51,7 +51,9 @@ def signin():
     if request.method == "POST":
         username = request.form['username']
         password = request.form["password"]
-        if username in users and password == users[username][password]:
+        #search in database using find_one()
+        curr_user = db.user_collection.find({username: username})
+        if  curr_user and password == curr_user[password]:
             user = User(username)
             flask_login.login_user(user)
             return render_template('index.html')
