@@ -24,7 +24,7 @@ db = cxn[os.getenv("MONGO_DBNAME")]
 #except Exception as e:
    #print(" * MongoDB connection error:", e)  
 users = {'foo@bar.tld': {'password': 'secret'}} # mock data
-class User(flask.login.UserMixin):
+class User(flask_login.UserMixin):
     def __init__(self, username):
         self.username = username
     def __str__(self):
