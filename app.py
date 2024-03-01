@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for,jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import pymongo
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
@@ -9,7 +9,7 @@ load_dotenv()
 app = Flask(__name__)
 
 cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
-db = cxn[str(os.getenv("MONGO_DBNAME"))]  
+db = cxn[str(os.getenv("MONGO_DBNAME"))]
 
 # the following try/except block is a way to verify that the database connection is alive (or not)
 try:
@@ -22,6 +22,10 @@ except Exception as e:
 def signin():
     return render_template('signin.html')
 
+@app.route('/signin', methods=['POST'])
+def signin():
+    return redirect('/signin')
+
 @app.route('/signup')
 def signup():
     return render_template('signup.html')
@@ -31,6 +35,7 @@ def home():
     tasks = db.tasks.find().limit(10)
     docs = [task for task in tasks]
     return render_template("index.html", docs = docs)
+
 @app.route("/edit/<post_id>")
 def edit(task_id):
      doc = db.tasks.find_one({"_id": ObjectId(task_id)})
@@ -39,13 +44,15 @@ def edit(task_id):
     #     url_for("home")
     # ) 
     #  change to the whateber html page for editing if not home. If home, don't mind the return redirect code
-@app.route()
+
+@app.route('/search', methods=["POST"])
 def search(task_id):
-     query = request.form.get('query')
-     results = []
-     if query:
-         results = db.tasks.find({"$text": {"$search": query}})
-     return render_template("search.html", results=results) 
+    query = request.form.get('query')
+    results = []
+    if query:
+        results = db.tasks.find({"$text": {"$search": query}})
+    return render_template("search.html", results=results)
+ 
 @app.route("/edit/<post_id>", methods=["POST"])
 def edit_task(task_id):
     task = request.form["task"]
@@ -61,6 +68,7 @@ def edit_task(task_id):
     # )  
     # change to the whateber html page for editing if not home. If home, don't mind the return redirect code
     return render_template("edit.html", doc=doc)
+
 @app.route("/delete/<post_id>")
 def delete(task_id):
     db.messages.delete_one({"_id": ObjectId(task_id)})
@@ -79,6 +87,7 @@ def add_task():
         return jsonify({"success": True}), 200
     else:
         return jsonify({"success": False, "error": "Task not provided"}), 400
+
 if __name__ == "__main__":
-    FLASK_PORT = os.getenv("FLASK_PORT", "5000")
+    FLASK_PORT = os.getenv("FLASK_PORT", "3000")
     app.run(port=FLASK_PORT)
