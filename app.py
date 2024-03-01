@@ -3,10 +3,13 @@ from flask import Flask, render_template, request, redirect, url_for,jsonify
 import pymongo
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
-
+from flask_login import LoginManager
 load_dotenv()
 # All of the return requires further information regarding front-end design, whether a new page is created for each button or not"
 app = Flask(__name__)
+#login
+login_manager = LoginManager()
+login_manager.init_app(app)
 # connect to the database
 cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
 db = cxn[os.getenv("MONGO_DBNAME")] 
