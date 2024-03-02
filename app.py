@@ -1,13 +1,14 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for,jsonify
 import pymongo
+import certifi
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 load_dotenv()
 # All of the return requires further information regarding front-end design, whether a new page is created for each button or not"
 app = Flask(__name__)
 
-cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
+cxn = pymongo.MongoClient(os.getenv("MONGO_URI"), tlsCAFile=certifi.where())
 db = cxn[str(os.getenv("MONGO_DBNAME"))]  
 
 # the following try/except block is a way to verify that the database connection is alive (or not)
