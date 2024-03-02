@@ -59,25 +59,30 @@ except Exception as e:
     print(" * MongoDB connection error:", e)  
 
 class User(flask_login.UserMixin):
-    pass
+   def __init__(self, user_id):
+        self.id = user_id
 
 @login_manager.user_loader
 def user_loader(username):
-    if username not in db.user_collection.find({"username": username}):
+    user_data = db.user_collection.find_one({"username": username})
+    if not user_data: 
+        return None
+    if user_data['username'] != username:
         return
-
-    user = User()
-    user.id = username
+    user = User(username)
     return user
 
 @login_manager.request_loader
 def request_loader(request):
     username = request.form.get('username')
-    if username not in db.user_collection.find({"username": username}):
+    if not username:
+        return None
+    user_data = db.user_collection.find_one({"username": username})
+    if not user_data:
+        return None
+    if user_data['username'] != username:
         return
-
-    user = User()
-    user.id = username
+    user = User(username)
     return user
 
 @login_manager.unauthorized_handler
@@ -92,16 +97,14 @@ def signin():
         #search in database using find_one()
         #curr_user = db.user_collection.find({username: username})
         curr_user = db.user_collection.find_one({"username": username})
-        print(curr_user)
         if not curr_user or not check_password_hash(curr_user['password'], password):
             error_message = "Username or password is incorrect."
             return render_template('signin.html', error_message=error_message)
         if  curr_user and check_password_hash(curr_user['password'], password):
-            user = User()
-            user.id = username
+            user = User(username)
             flask_login.login_user(user)
-            return render_template('index.html')
-            #return redirect('/home')
+            print(user.is_authenticated)
+            return redirect(flask.url_for('home'))
     return render_template('signin.html')
 
 @app.route('/signup', methods=["GET", "POST"])
@@ -125,7 +128,7 @@ def signup():
 @flask_login.login_required
 def logout():
     flask_login.logout_user()
-    return render_template('signin.html')
+    return redirect('signin')
 
 @app.route("/")
 @flask_login.login_required
