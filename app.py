@@ -117,7 +117,7 @@ def signup():
             return render_template('signup.html', error_message=error_message)
         doc = {'username': username, 'password': generate_password_hash(password)}
         db.user_collection.insert_one(doc)
-        return render_template('signin.html')
+        return redirect('signin')
     return render_template('signup.html')
 
 @app.route('/logout', methods=["GET"])
