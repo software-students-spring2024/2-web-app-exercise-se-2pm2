@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import flask
 import pymongo
+import certifi
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 import calendar
@@ -18,6 +19,7 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 app.secret_key = os.getenv("SECRET_KEY")
 # connect to the database
+
 cxn = pymongo.MongoClient(os.getenv("MONGO_URI"), tlsCAFile=certifi.where())
 db = cxn[str(os.getenv("MONGO_DBNAME"))]  
 
@@ -49,6 +51,12 @@ def getCalendarDates(date):
     
 
     return prev_month_days, month_days, next_month_days
+# the following try/except block is a way to verify that the database connection is alive (or not)
+try:
+    cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
+    print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
+except Exception as e:
+    print(" * MongoDB connection error:", e)  
 
 class User(flask_login.UserMixin):
     pass
@@ -121,8 +129,8 @@ def logout():
 @app.route("/")
 @flask_login.login_required
 def home():
-    #tasks = db.tasks.find().limit(10)
-    #docs = [task for task in tasks]
+    tasks = db.tasks.find().limit(10)
+    docs = [task for task in tasks]
     today = datetime.today()
     month_year = today.strftime("%B %Y")
 
@@ -132,7 +140,7 @@ def home():
     # Calendar Functionality
     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-    return render_template("index.html", month_year = month_year, prevDays = prevMonthDays.items(), monthDays = monthDays.items(), nextDays = nextMonthDays.items())
+    return render_template("index.html", docs = docs, month_year = month_year, prevDays = prevMonthDays.items(), monthDays = monthDays.items(), nextDays = nextMonthDays.items())
 @app.route("/edit/<post_id>")
 @flask_login.login_required
 def edit(task_id):
