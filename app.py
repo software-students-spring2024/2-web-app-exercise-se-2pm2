@@ -1,16 +1,23 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for,jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify
+import flask
 import pymongo
 import certifi
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 import calendar
 from datetime import datetime, timedelta
-
-
+import certifi
+import flask_login
 load_dotenv()
 # All of the return requires further information regarding front-end design, whether a new page is created for each button or not"
 app = Flask(__name__)
+
+#login
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
+app.secret_key = os.getenv("SECRET_KEY")
+# connect to the database
 
 cxn = pymongo.MongoClient(os.getenv("MONGO_URI"), tlsCAFile=certifi.where())
 db = cxn[str(os.getenv("MONGO_DBNAME"))]  
@@ -37,7 +44,6 @@ def getCalendarDates(date):
     
 
     return prev_month_days, month_days, next_month_days
-
 # the following try/except block is a way to verify that the database connection is alive (or not)
 try:
     cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
@@ -47,13 +53,45 @@ except Exception as e:
 
 @app.route('/signin')
 def signin():
+    print(request.method)
+    if request.method == "POST":
+        username = request.form['username']
+        password = request.form["password"]
+        print(username, password)
+        #search in database using find_one()
+        #curr_user = db.user_collection.find({username: username})
+        if  username in users['username'] and password == users['password']:
+            user = User()
+            user.id = username
+            flask_login.login_user(user)
+            return render_template('index.html')
     return render_template('signin.html')
 
-@app.route('/signup')
+@app.route('/signup', methods=["GET", "POST"])
 def signup():
+    if request.method == "POST":
+        username = request.form['username']
+        password = request.form["password"]
+        password2 = request.form["password2"]
+        if password != password2:
+            error_message = "Passwords do not match."
+            return render_template('signup.html', error_message=error_message)
+        if db.user_collection.find_one({'username': username}):
+            error_message = "Username is already taken."
+            return render_template('signup.html', error_message=error_message)
+        doc = {'username': username, 'password': password}
+        db.user_collection.insert_one(doc)
+        return render_template('signin.html')
     return render_template('signup.html')
 
+@app.route('/logout')
+@flask_login.login_required
+def logout():
+    flask_login.logout_user()
+    return render_template('signin.html')
+
 @app.route("/")
+@flask_login.login_required
 def home():
     tasks = db.tasks.find().limit(10)
     docs = [task for task in tasks]
@@ -94,7 +132,7 @@ def edit_task(task_id):
     doc = db.tasks.update_one({"_id": ObjectId(task_id)},{"$set": doc})
     # return redirect(
     #     url_for("home")
-    # )  
+    # )  kj
     # change to the whateber html page for editing if not home. If home, don't mind the return redirect code
     return render_template("edit.html", doc=doc)
 @app.route("/delete/<post_id>")
