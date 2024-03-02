@@ -8,6 +8,7 @@ import calendar
 from datetime import datetime, timedelta
 import certifi
 import flask_login
+from werkzeug.security import generate_password_hash, check_password_hash
 load_dotenv()
 # All of the return requires further information regarding front-end design, whether a new page is created for each button or not"
 app = Flask(__name__)
@@ -84,10 +85,10 @@ def signin():
         #curr_user = db.user_collection.find({username: username})
         curr_user = db.user_collection.find_one({"username": username})
         print(curr_user)
-        if not curr_user or password != curr_user['password']:
+        if not curr_user or not check_password_hash(curr_user['password'], password):
             error_message = "Username or password is incorrect."
             return render_template('signin.html', error_message=error_message)
-        if  curr_user and password == curr_user["password"]:
+        if  curr_user and check_password_hash(curr_user['password'], password):
             user = User()
             user.id = username
             flask_login.login_user(user)
@@ -106,12 +107,12 @@ def signup():
         if db.user_collection.find_one({'username': username}):
             error_message = "Username is already taken."
             return render_template('signup.html', error_message=error_message)
-        doc = {'username': username, 'password': password}
+        doc = {'username': username, 'password': generate_password_hash(password)}
         db.user_collection.insert_one(doc)
         return render_template('signin.html')
     return render_template('signup.html')
 
-@app.route('/logout')
+@app.route('/logout', methods=["GET"])
 @flask_login.login_required
 def logout():
     flask_login.logout_user()
@@ -133,6 +134,7 @@ def home():
 
     return render_template("index.html", month_year = month_year, prevDays = prevMonthDays.items(), monthDays = monthDays.items(), nextDays = nextMonthDays.items())
 @app.route("/edit/<post_id>")
+@flask_login.login_required
 def edit(task_id):
      doc = db.tasks.find_one({"_id": ObjectId(task_id)})
      return render_template("edit.html", doc=doc) 
@@ -141,6 +143,7 @@ def edit(task_id):
     # ) 
     #  change to the whateber html page for editing if not home. If home, don't mind the return redirect code
 @app.route("/search")
+@flask_login.login_required
 def search():
      query = request.form.get('query')
      results = {}
@@ -148,6 +151,7 @@ def search():
          results = db.tasks.find({"task": {"search": query}}, {"date": {"$search": query}})
      return render_template("search.html", results=results) 
 @app.route("/edit/<post_id>", methods=["POST"])
+@flask_login.login_required
 def edit_task(task_id):
     task = request.form["task"]
     date = request.form["date"]
@@ -163,6 +167,7 @@ def edit_task(task_id):
     # change to the whateber html page for editing if not home. If home, don't mind the return redirect code
     return render_template("edit.html", doc=doc)
 @app.route("/delete/<post_id>")
+@flask_login.login_required
 def delete(task_id):
     db.messages.delete_one({"_id": ObjectId(task_id)})
     return render_template("delete.html")
@@ -171,6 +176,7 @@ def delete(task_id):
     #     url_for("home")
     # ) 
 @app.route("/add_task", methods=["POST"])
+@flask_login.login_required
 def add_task():
     task = request.form["task"]
     date = request.form["date"]
