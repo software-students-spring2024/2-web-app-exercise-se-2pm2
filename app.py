@@ -4,51 +4,46 @@ import flask
 import pymongo
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
+import calendar
+from datetime import datetime, timedelta
+
 import flask_login
-import datetime
 load_dotenv()
 # All of the return requires further information regarding front-end design, whether a new page is created for each button or not"
 app = Flask(__name__)
+
 #login
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 app.secret_key = os.getenv("SECRET_KEY")
 # connect to the database
 cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
-db = cxn[os.getenv("MONGO_DBNAME")] 
+db = cxn[str(os.getenv("MONGO_DBNAME"))]  
 
-# the following try/except block is a way to verify that the database connection is alive (or not)
-#try:
-   #cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
-   #print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
-#except Exception as e:
-   #print(" * MongoDB connection error:", e)  
-users = {'username': "Minjae", 'password': "203"} # mock data
-class User(flask_login.UserMixin):
-    pass
+def getCalendarDates(date):
+    first = date.replace(day=1)
+    prev_month = first - timedelta(days=1)
+
+    # Extract the year and month from today's date
+    year = date.year
+    month = date.month
+
+    last_year = prev_month.year
+    last_month = prev_month.month
+
+    # Get the number of days in the current month
+    day_of_week, month_len = calendar.monthrange(year, month)
+    _, prev_month_len = calendar.monthrange(last_year, last_month)
+    prev_month_days = {}
+    if day_of_week != 6:
+        prev_month_days = {day: "inactive" for day in range(prev_month_len - day_of_week, prev_month_len + 1)}
+    month_days = {day: "" for day in range(1, month_len + 1)}
+    next_month_days = {day: "inactive" for day in range(1, 8 - ((len(prev_month_days) + len(month_days)) % 7))}
     
-@login_manager.unauthorized_handler
-def unauthorized():
-    return redirect(url_for('signin'))
 
-@login_manager.user_loader
-def user_loader(email):
-    if email not in users:
-        return
+    return prev_month_days, month_days, next_month_days
 
-    user = User()
-    user.id = email
-    return user
-@login_manager.request_loader
-def request_loader(request):
-    email = request.form.get('email')
-    if email not in users:
-        return
-
-    user = User()
-    user.id = email
-    return user
-@app.route('/signin', methods=["GET", "POST"])
+@app.route('/signin')
 def signin():
     print(request.method)
     if request.method == "POST":
@@ -92,7 +87,16 @@ def logout():
 def home():
     #tasks = db.tasks.find().limit(10)
     #docs = [task for task in tasks]
-    return render_template("index.html")
+    today = datetime.today()
+    month_year = today.strftime("%B %Y")
+
+    prevMonthDays, monthDays, nextMonthDays = getCalendarDates(today)
+    monthDays[today.day] = 'active'
+    monthDays[today.day + 1] = 'event'
+    # Calendar Functionality
+    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+    return render_template("index.html", month_year = month_year, prevDays = prevMonthDays.items(), monthDays = monthDays.items(), nextDays = nextMonthDays.items())
 @app.route("/edit/<post_id>")
 def edit(task_id):
      doc = db.tasks.find_one({"_id": ObjectId(task_id)})
