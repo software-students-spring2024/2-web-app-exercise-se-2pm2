@@ -6,7 +6,7 @@ from bson.objectid import ObjectId
 from dotenv import load_dotenv
 import calendar
 from datetime import datetime, timedelta
-
+import certifi
 import flask_login
 load_dotenv()
 # All of the return requires further information regarding front-end design, whether a new page is created for each button or not"
@@ -17,7 +17,7 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 app.secret_key = os.getenv("SECRET_KEY")
 # connect to the database
-cxn = pymongo.MongoClient(os.getenv("MONGO_URI"))
+cxn = pymongo.MongoClient(os.getenv("MONGO_URI"), tlsCAFile=certifi.where())
 db = cxn[str(os.getenv("MONGO_DBNAME"))]  
 
 def getCalendarDates(date):
