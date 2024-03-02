@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import calendar
 from datetime import datetime, timedelta
 
+
 load_dotenv()
 # All of the return requires further information regarding front-end design, whether a new page is created for each button or not"
 app = Flask(__name__)
