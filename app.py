@@ -20,6 +20,12 @@ app.secret_key = os.getenv("SECRET_KEY")
 cxn = pymongo.MongoClient(os.getenv("MONGO_URI"), tlsCAFile=certifi.where())
 db = cxn[str(os.getenv("MONGO_DBNAME"))]  
 
+try:
+    cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
+    print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
+except Exception as e:
+    print(" * MongoDB connection error:", e)  
+
 def getCalendarDates(date):
     first = date.replace(day=1)
     prev_month = first - timedelta(days=1)
@@ -43,16 +49,45 @@ def getCalendarDates(date):
 
     return prev_month_days, month_days, next_month_days
 
-@app.route('/signin')
+class User(flask_login.UserMixin):
+    pass
+
+@login_manager.user_loader
+def user_loader(username):
+    if username not in db.user_collection.find({"username": username}):
+        return
+
+    user = User()
+    user.id = username
+    return user
+
+@login_manager.request_loader
+def request_loader(request):
+    username = request.form.get('username')
+    if username not in db.user_collection.find({"username": username}):
+        return
+
+    user = User()
+    user.id = username
+    return user
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return redirect('signin')
+
+@app.route('/signin', methods=["GET", "POST"])
 def signin():
-    print(request.method)
     if request.method == "POST":
         username = request.form['username']
         password = request.form["password"]
-        print(username, password)
         #search in database using find_one()
         #curr_user = db.user_collection.find({username: username})
-        if  username in users['username'] and password == users['password']:
+        curr_user = db.user_collection.find_one({"username": username})
+        print(curr_user)
+        if not curr_user or password != curr_user['password']:
+            error_message = "Username or password is incorrect."
+            return render_template('signin.html', error_message=error_message)
+        if  curr_user and password == curr_user["password"]:
             user = User()
             user.id = username
             flask_login.login_user(user)
