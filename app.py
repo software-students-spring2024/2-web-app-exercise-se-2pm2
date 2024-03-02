@@ -101,6 +101,7 @@ def signin():
             user.id = username
             flask_login.login_user(user)
             return render_template('index.html')
+            #return redirect('/home')
     return render_template('signin.html')
 
 @app.route('/signup', methods=["GET", "POST"])
@@ -141,15 +142,18 @@ def home():
     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
     return render_template("index.html", docs = docs, month_year = month_year, prevDays = prevMonthDays.items(), monthDays = monthDays.items(), nextDays = nextMonthDays.items())
-@app.route("/edit/<post_id>")
+
+@app.route("/edit")
 @flask_login.login_required
 def edit(task_id):
      doc = db.tasks.find_one({"_id": ObjectId(task_id)})
-     return render_template("edit.html", doc=doc) 
+     #return render_template("edit.html", doc=doc)
+     return render_template('edit.html') 
     # return redirect(
     #     url_for("home")
     # ) 
     #  change to the whateber html page for editing if not home. If home, don't mind the return redirect code
+
 @app.route("/search")
 @flask_login.login_required
 def search():
@@ -157,8 +161,9 @@ def search():
      results = {}
      if query:
          results = db.tasks.find({"task": {"search": query}}, {"date": {"$search": query}})
-     return render_template("search.html", results=results) 
-@app.route("/edit/<post_id>", methods=["POST"])
+     return render_template("search.html", results=results)
+ 
+@app.route("/edit", methods=["POST"])
 @flask_login.login_required
 def edit_task(task_id):
     task = request.form["task"]
@@ -173,7 +178,8 @@ def edit_task(task_id):
     #     url_for("home")
     # )  kj
     # change to the whateber html page for editing if not home. If home, don't mind the return redirect code
-    return render_template("edit.html", doc=doc)
+    #return render_template("edit.html", doc=doc)
+    return render_template('edit.html')
 
 @app.route("/delete/<post_id>")
 @flask_login.login_required
@@ -183,8 +189,13 @@ def delete(task_id):
     # or
     # return redirect(
     #     url_for("home")
-    # ) 
-@app.route("/add_task", methods=["POST"])
+    # )
+
+@app.route("/add")
+def add():
+    return render_template('add.html')
+
+@app.route("/add", methods=["POST"])
 @flask_login.login_required
 def add_task():
     task = request.form["task"]
