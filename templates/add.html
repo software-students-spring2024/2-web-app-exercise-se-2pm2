@@ -1,1 +1,42 @@
-<h1>add page goes here</h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h2>Task Data</h2>
+    <table>
+        <tr>
+            <th>Task</th>
+            <th>Date</th>
+            <th>Task ID</th>
+        </tr>
+        {% for document in documents %}
+            <tr>
+                <td>{{ document.task }}</td>
+                <td>{{ document.date }}</td>
+                <td>{{ document.taskId }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Add Task</h2>
+    <form action="/add" method="post">
+        <label for="task">Task:</label>
+        <input type="text" id="task" name="task" required>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
