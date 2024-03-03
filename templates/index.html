@@ -6,7 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ToDo Calendar</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/Users/yiweiluo/2-web-app-exercise-se-2pm2/static/css/styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script>
+        $(document).ready(function(){
+            $(".search-button").click(function(){
+                var query = $("input[type='text']").val();
+                $.ajax({
+                    type: "POST",
+                    url: "/search",
+                    data: {query: query},
+                });
+            });
+        });
+    </script>
 </head>
 <body>
     <header>
@@ -66,11 +80,10 @@
             </a>
         </div>
     </div>
-
     <div class="wrapper">
-        <input type="text" placeholder="Search...">
+        <input type="text" name = "query"placeholder="Search...">
         <a href="/search">
-        <button class="search-button">Search</button>
+        <button type = "submit" class="search-button">Search</button>
         </a>
     </div>
     <a href="/logout"><button type="submit" class="delete-event-button">Log out</button></a>
