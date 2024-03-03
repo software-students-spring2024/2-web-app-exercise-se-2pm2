@@ -66,8 +66,6 @@ def getCalendarDates(date):
     return prev_month_days, month_days, next_month_days
     
 
-    return prev_month_days, month_days, next_month_days
-
 class User(flask_login.UserMixin):
    def __init__(self, user_id):
         self.id = user_id
@@ -214,7 +212,7 @@ def edit():
     documents = list(db['tasks'].find({}, {'_id': 0}))
     return render_template('edit.html', documents = documents) 
 
-@app.route("/search")
+@app.route("/search",  methods = ['get','POST'])
 @flask_login.login_required
 def search():
      query = request.form.get('query')
