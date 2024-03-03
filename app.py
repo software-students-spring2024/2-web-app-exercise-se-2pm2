@@ -236,7 +236,6 @@ def search():
      results = []
      if query:
         results = list(db.tasks.find({"task": {"$regex": query, "$options": "i"}}))
-        print("Search results:", results) 
      return render_template("search.html", results=results)
 
 # adding route handler
