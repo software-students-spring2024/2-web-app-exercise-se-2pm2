@@ -14,10 +14,9 @@
             <p class="todo-header">Todo List</p>
         </header>
         <ul class="todo-list">
-            <li>Complete assignment</li>
-            <li>Prepare for meeting</li>
-            <li>Buy groceries</li>
-            <li>Call mom</li>
+            {% for doc in docs%}
+            <li>{{doc}}</li>
+            {% endfor %}
         </ul>
         <div class="button-container">
             <button class="add-event-button">Add Event</button>

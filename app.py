@@ -67,12 +67,6 @@ def getCalendarDates(date):
     
 
     return prev_month_days, month_days, next_month_days
-# the following try/except block is a way to verify that the database connection is alive (or not)
-try:
-    cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
-    print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
-except Exception as e:
-    print(" * MongoDB connection error:", e)  
 
 class User(flask_login.UserMixin):
    def __init__(self, user_id):
@@ -119,7 +113,6 @@ def signin():
         if  curr_user and check_password_hash(curr_user['password'], password):
             user = User(username)
             flask_login.login_user(user)
-            print(user.is_authenticated)
             return redirect(flask.url_for('home'))
     return render_template('signin.html')
 
@@ -166,9 +159,10 @@ def home():
 @app.route("/date/<date>")
 @flask_login.login_required
 def date_events(date):
+    docs = db['tasks'].find({'date': date})
     my_datetime = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
     formated_date = my_datetime.strftime("%B %d %Y")
-    return render_template("events.html", date=formated_date)
+    return render_template("events.html", date=formated_date, docs=docs)
 
 
 # editing route handler
@@ -251,6 +245,7 @@ def delete():
     # display delete template
     documents = list(db['tasks'].find({}, {'_id': 0}))
     return render_template('delete.html', documents = documents) 
+
 
 if __name__ == "__main__":
     FLASK_PORT = os.getenv("FLASK_PORT", "3000")
