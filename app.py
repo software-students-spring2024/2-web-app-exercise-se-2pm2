@@ -55,9 +55,15 @@ def getCalendarDates(date):
     _, prev_month_len = calendar.monthrange(last_year, last_month)
     prev_month_days = {}
     if day_of_week != 6:
-        prev_month_days = {day: "inactive" for day in range(prev_month_len - day_of_week, prev_month_len + 1)}
-    month_days = {day: "" for day in range(1, month_len + 1)}
-    next_month_days = {day: "inactive" for day in range(1, 8 - ((len(prev_month_days) + len(month_days)) % 7))}
+        for day in range(prev_month_len - day_of_week, prev_month_len + 1):
+            prev_month_days[datetime(last_year, last_month, day)] = "inactive"
+    
+    month_days = {datetime(year, month, day): "" for day in range(1, month_len + 1)}
+
+    next_month = date.replace(month=date.month % 12 + 1, year=date.year + (1 if date.month == 12 else 0))
+    next_month_days = {datetime(next_month.year, next_month.month, day): "inactive" for day in range(1, 8 - ((len(prev_month_days) + len(month_days)) % 7))}
+    
+    return prev_month_days, month_days, next_month_days
     
 
     return prev_month_days, month_days, next_month_days
@@ -148,16 +154,22 @@ def logout():
 def home():
     tasks = db.tasks.find().limit(10)
     docs = [task for task in tasks]
-    today = datetime.today()
+    today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
     month_year = today.strftime("%B %Y")
 
     prevMonthDays, monthDays, nextMonthDays = getCalendarDates(today)
-    monthDays[today.day] = 'active'
-    monthDays[today.day + 1] = 'event'
-    # Calendar Functionality
-    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    monthDays[today] = 'active'
+    monthDays[today + timedelta(days=1)] = 'event'
 
     return render_template("index.html", docs = docs, month_year = month_year, prevDays = prevMonthDays.items(), monthDays = monthDays.items(), nextDays = nextMonthDays.items())
+
+@app.route("/date/<date>")
+@flask_login.login_required
+def date_events(date):
+    my_datetime = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    formated_date = my_datetime.strftime("%B %d %Y")
+    return render_template("events.html", date=formated_date)
+
 
 # editing route handler
 @app.route("/edit", methods=['GET', 'POST'])
