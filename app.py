@@ -159,13 +159,39 @@ def home():
 @app.route("/date/<date>")
 @flask_login.login_required
 def date_events(date):
-    docs = db['tasks'].find({'date': date})
+    
     my_datetime = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    data_date = str(my_datetime)
+    data_date = data_date[:10]
+    docs = db['tasks'].find({"date": data_date})
     formated_date = my_datetime.strftime("%B %d %Y")
-    return render_template("events.html", date=formated_date, docs=docs)
+    return render_template("events.html", date=formated_date, docs=docs, operation_date=data_date)
 
 
 # editing route handler
+
+@app.route("/edit/<date>", methods=['GET', 'POST'])
+@flask_login.login_required
+def edit_for_specific_date(date):
+
+    # POST handler
+    if request.method == 'POST':
+
+        # get form data
+        taskId = int(request.form['taskId'])
+        task = request.form['task']
+        date = request.form['date']
+
+        # update collection
+        db['tasks'].update_one({'taskId': taskId}, {'$set': {'task': task, 'date': date}})
+
+        # refresh page
+        return redirect(url_for('edit_for_specific_date', date=date))
+
+    # load the edit template
+    documents = list(db['tasks'].find({'date': date}, {'_id': 0}))
+    return render_template('edit.html', documents = documents, date=date) 
+
 @app.route("/edit", methods=['GET', 'POST'])
 @flask_login.login_required
 def edit():
@@ -198,6 +224,31 @@ def search():
      return render_template("search.html", results=results)
 
 # adding route handler
+@app.route("/add/<date>", methods = ['GET', 'POST'])
+@flask_login.login_required
+def add_for_specific_date(date):
+
+    # POST handler
+    if request.method == 'POST':
+
+        #set taskId and increment the counter
+        taskId = readCounter()
+        taskId += 1
+        writeCounter(taskId)
+
+        # get form data
+        task = request.form['task']
+        date = request.form['date']
+
+        # update collection
+        db['tasks'].insert_one({'taskId': taskId, 'task': task, 'date': date})
+
+        # refresh page
+        return redirect(url_for('add_for_specific_date', date=date))
+    documents = list(db['tasks'].find({'date': date}, {'_id': 0}))
+    # display add template
+    return render_template('add.html', documents = documents, date=date)
+
 @app.route("/add", methods = ['GET', 'POST'])
 @flask_login.login_required
 def add():
@@ -219,10 +270,32 @@ def add():
 
         # refresh page
         return redirect(url_for('add'))
-
     # display add template
     documents = list(db['tasks'].find({}, {'_id': 0}))
     return render_template('add.html', documents = documents)
+
+# delete_handler for specific dates
+
+@app.route("/delete/<date>", methods = ['GET', 'POST'])
+@flask_login.login_required
+def delete_for_specific_date(date):
+
+    # POST handler
+    if request.method == 'POST':
+
+        # get taskId
+        taskId = int(request.form['taskId'])
+
+        # delete
+        if taskId is not None:
+            db['tasks'].delete_one({'taskId': taskId})
+
+        # refresh
+        return redirect(url_for('delete_for_specific_date', date=date))
+
+    # display delete template
+    documents = list(db['tasks'].find({'date': date}, {'_id': 0}))
+    return render_template('delete.html', documents = documents, date=date) 
 
 # delete handler
 @app.route("/delete", methods = ['GET', 'POST'])
