@@ -45,13 +45,13 @@
             </ul>
             <ul class="days">
                 {% for date, class in prevDays %}
-                <li class={{class}}><a href="/date/{{date}}">{{ date.day }}</a></li>
+                <li class="{{class}}"><a href="/date/{{date}}">{{ date.day }}</a></li>
                 {% endfor %}
                 {% for date, class in monthDays %}
-                <li class={{class}}><a href="/date/{{date}}">{{ date.day }}</a></li>
+                <li class="{{class}}"><a href="/date/{{date}}">{{ date.day }}</a></li>
                 {% endfor %}
                 {% for date, class in nextDays %}
-                <li class={{class}}><a href="/date/{{date}}">{{ date.day }}</a></li>
+                <li class="{{class}}"><a href="/date/{{date}}">{{ date.day }}</a></li>
                 {% endfor %}
             </ul>
         </div>
