@@ -17,7 +17,7 @@
 </head>
 <body>
     <div class="wrapper">
-    <h2>Task Data</h2>
+    <h2 style = "color: black;">Task Data</h2>
     <table>
         <tr>
             <th>Task</th>
@@ -33,7 +33,7 @@
         {% endfor %}
     </table>
 
-    <h2>Add Task</h2>
+    <h2 style = "color: black;">Add Task</h2>
     <form action="" method="post">
         <label for="task">Task:</label>
         <input type="text" id="task" name="task" required>
@@ -41,6 +41,7 @@
         <input type="date" id="date" name="date" value="{{date}}" required>
         <input type="submit" value="Add Task"  class="add-event-button" style = "margin-top: 20px;">
     </form>
+    <div style="padding-top: 20px;">
     <a href="/"><button type="submit" class="delete-event-button">Home</button></a>
     </div>
 </body>
