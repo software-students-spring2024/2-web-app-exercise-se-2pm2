@@ -79,12 +79,12 @@
             </a>
         </div>
     </div>
-    <div class="wrapper">
-        <input type="text" name = "query"placeholder="Search...">
-        <a href="/search">
-        <button type = "submit" class="search-button">Search</button>
-        </a>
-    </div>
+    <form action="/search" method="POST">
+        <div class="wrapper">
+            <input type="text" name="query" placeholder="Search...">
+            <button type="submit" class="search-button">Search</button>
+        </div>
+    </form>
     <a href="/logout"><button type="submit" class="delete-event-button">Log out</button></a>
     
     
