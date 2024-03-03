@@ -27,7 +27,17 @@ try:
     cxn.admin.command("ping")  # The ping command is cheap and does not require auth.
     print(" *", "Connected to MongoDB!")  # if we get here, the connection worked!
 except Exception as e:
-    print(" * MongoDB connection error:", e)  
+    print(" * MongoDB connection error:", e)
+
+# persistent counter for taskId generation (taskId can overlap values if counter is not saved)
+def readCounter():
+    counterSetting = db['settings'].find_one({'setting': 'counter'})
+    if counterSetting:
+        return int(counterSetting['value'])
+    return 0
+
+def writeCounter(counter):
+    db['settings'].update_one({'setting': 'counter'}, {'$set': {'value': counter}}) 
 
 def getCalendarDates(date):
     first = date.replace(day=1)
@@ -145,15 +155,30 @@ def home():
     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
     return render_template("index.html", docs = docs, month_year = month_year, prevDays = prevMonthDays.items(), monthDays = monthDays.items(), nextDays = nextMonthDays.items())
-@app.route("/edit/<post_id>")
+
+# editing route handler
+@app.route("/edit", methods=['GET', 'POST'])
 @flask_login.login_required
-def edit(task_id):
-     doc = db.tasks.find_one({"_id": ObjectId(task_id)})
-     return render_template("edit.html", doc=doc) 
-    # return redirect(
-    #     url_for("home")
-    # ) 
-    #  change to the whateber html page for editing if not home. If home, don't mind the return redirect code
+def edit():
+
+    # POST handler
+    if request.method == 'POST':
+
+        # get form data
+        taskId = int(request.form['taskId'])
+        task = request.form['task']
+        date = request.form['date']
+
+        # update collection
+        db['tasks'].update_one({'taskId': taskId}, {'$set': {'task': task, 'date': date}})
+
+        # refresh page
+        return redirect(url_for('edit'))
+
+    # load the edit template
+    documents = list(db['tasks'].find({}, {'_id': 0}))
+    return render_template('edit.html', documents = documents) 
+
 @app.route("/search")
 @flask_login.login_required
 def search():
@@ -161,43 +186,57 @@ def search():
      results = {}
      if query:
          results = db.tasks.find({"task": {"search": query}}, {"date": {"$search": query}})
-     return render_template("search.html", results=results) 
-@app.route("/edit/<post_id>", methods=["POST"])
+     return render_template("search.html", results=results)
+
+# adding route handler
+@app.route("/add", methods = ['GET', 'POST'])
 @flask_login.login_required
-def edit_task(task_id):
-    task = request.form["task"]
-    date = request.form["date"]
-    doc = {
-        "_id": ObjectId(task_id),
-        "task": task,
-        "date": date,
-    }
-    doc = db.tasks.update_one({"_id": ObjectId(task_id)},{"$set": doc})
-    # return redirect(
-    #     url_for("home")
-    # )  kj
-    # change to the whateber html page for editing if not home. If home, don't mind the return redirect code
-    return render_template("edit.html", doc=doc)
-@app.route("/delete/<post_id>")
+def add():
+
+    # POST handler
+    if request.method == 'POST':
+
+        #set taskId and increment the counter
+        taskId = readCounter()
+        taskId += 1
+        writeCounter(taskId)
+
+        # get form data
+        task = request.form['task']
+        date = request.form['date']
+
+        # update collection
+        db['tasks'].insert_one({'taskId': taskId, 'task': task, 'date': date})
+
+        # refresh page
+        return redirect(url_for('add'))
+
+    # display add template
+    documents = list(db['tasks'].find({}, {'_id': 0}))
+    return render_template('add.html', documents = documents)
+
+# delete handler
+@app.route("/delete", methods = ['GET', 'POST'])
 @flask_login.login_required
-def delete(task_id):
-    db.messages.delete_one({"_id": ObjectId(task_id)})
-    return render_template("delete.html")
-    # or
-    # return redirect(
-    #     url_for("home")
-    # ) 
-@app.route("/add_task", methods=["POST"])
-@flask_login.login_required
-def add_task():
-    task = request.form["task"]
-    date = request.form["date"]
-    doc = {"task":task, "date": date}
-    if task and date:
-        db.tasks.insert_one(doc)
-        return jsonify({"success": True}), 200
-    else:
-        return jsonify({"success": False, "error": "Task not provided"}), 400
+def delete():
+
+    # POST handler
+    if request.method == 'POST':
+
+        # get taskId
+        taskId = int(request.form['taskId'])
+
+        # delete
+        if taskId is not None:
+            db['tasks'].delete_one({'taskId': taskId})
+
+        # refresh
+        return redirect(url_for('delete'))
+
+    # display delete template
+    documents = list(db['tasks'].find({}, {'_id': 0}))
+    return render_template('delete.html', documents = documents) 
+
 if __name__ == "__main__":
-    FLASK_PORT = os.getenv("FLASK_PORT", "5000")
+    FLASK_PORT = os.getenv("FLASK_PORT", "3000")
     app.run(port=FLASK_PORT)
