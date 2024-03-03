@@ -37,6 +37,15 @@ header {
     font-weight: 500;
 }
 
+h2 {
+    color: #f2f2f2
+}
+
+a {
+    text-decoration: none; /* Remove underlines */
+    color: inherit; /* Use the parent's color (usually black or as specified by the parent element) */
+}
+
 header .icons span {
     height: 38px;
     width: 38px;
