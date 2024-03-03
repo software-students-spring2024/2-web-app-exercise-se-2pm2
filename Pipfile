@@ -369,5 +369,4 @@ zstandard = {file = "../../cbousseau/work/recipes/ci_py311_2/zstandard_167899619
 
 [dev-packages]
 
-[requires]
-python_version = "3.11"
+
