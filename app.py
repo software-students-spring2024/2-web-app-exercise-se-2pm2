@@ -229,13 +229,14 @@ def edit():
     documents = list(db['tasks'].find({}, {'_id': 0}))
     return render_template('edit.html', documents = documents) 
 
-@app.route("/search")
+@app.route("/search",  methods = ['GET','POST'])
 @flask_login.login_required
 def search():
      query = request.form.get('query')
-     results = {}
+     results = []
      if query:
-         results = db.tasks.find({"task": {"search": query}}, {"date": {"$search": query}})
+        results = list(db.tasks.find({"task": {"$regex": query, "$options": "i"}}))
+        print("Search results:", results) 
      return render_template("search.html", results=results)
 
 # adding route handler
@@ -337,4 +338,4 @@ def delete():
 
 if __name__ == "__main__":
     FLASK_PORT = os.getenv("FLASK_PORT", "3000")
-    app.run(port=FLASK_PORT)
+    app.run(debug=True, port=FLASK_PORT)
