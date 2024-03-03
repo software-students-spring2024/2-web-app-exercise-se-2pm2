@@ -50,6 +50,9 @@ def getCalendarDates(date):
     last_year = prev_month.year
     last_month = prev_month.month
 
+    tasks = db.tasks.find()
+    event_dates = [task['date'] for task in tasks]
+    
     # Get the number of days in the current month
     day_of_week, month_len = calendar.monthrange(year, month)
     _, prev_month_len = calendar.monthrange(last_year, last_month)
@@ -63,8 +66,18 @@ def getCalendarDates(date):
     next_month = date.replace(month=date.month % 12 + 1, year=date.year + (1 if date.month == 12 else 0))
     next_month_days = {datetime(next_month.year, next_month.month, day): "inactive" for day in range(1, 8 - ((len(prev_month_days) + len(month_days)) % 7))}
     
-    return prev_month_days, month_days, next_month_days
+    for event_date in event_dates:
+        my_datetime = datetime.strptime(event_date, '%Y-%m-%d')
+        if my_datetime in prev_month_days.keys():
+            prev_month_days[my_datetime] += ' event'
+        elif my_datetime in month_days.keys():
+            month_days[my_datetime] += ' event'
+        elif my_datetime in next_month_days.keys():
+            next_month_days[my_datetime] += ' event'
     
+    print(next_month_days)
+
+    return prev_month_days, month_days, next_month_days
 
 class User(flask_login.UserMixin):
    def __init__(self, user_id):
@@ -144,13 +157,17 @@ def back():
 @flask_login.login_required
 def home():
     tasks = db.tasks.find().limit(10)
+    see_tasks = db.tasks.find()
+    see_docs = [task['date'] for task in see_tasks]
+    
     docs = [task for task in tasks]
     today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
     month_year = today.strftime("%B %Y")
-
+    year = today.year
+    month = today.month
+    print(see_docs)
     prevMonthDays, monthDays, nextMonthDays = getCalendarDates(today)
-    monthDays[today] = 'active'
-    monthDays[today + timedelta(days=1)] = 'event'
+    monthDays[today] += ' active'
 
     return render_template("index.html", docs = docs, month_year = month_year, prevDays = prevMonthDays.items(), monthDays = monthDays.items(), nextDays = nextMonthDays.items())
 
