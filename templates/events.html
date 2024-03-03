@@ -5,7 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="/Users/yiweiluo/2-web-app-exercise-se-2pm2/static/css/styles.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
@@ -15,15 +14,14 @@
             <p class="todo-header">Todo List</p>
         </header>
         <ul class="todo-list">
-            <li>Complete assignment</li>
-            <li>Prepare for meeting</li>
-            <li>Buy groceries</li>
-            <li>Call mom</li>
+            {% for doc in docs%}
+            <li>{{doc.task}}</li>
+            {% endfor %}
         </ul>
         <div class="button-container">
-            <button class="add-event-button">Add Event</button>
-            <button class="edit-event-button">Edit Event</button>
-            <button class="delete-event-button">Delete Event</button>
+            <a href="/add/{{operation_date}}"><button class="add-event-button">Add Event</button></a>
+            <a href="/edit/{{operation_date}}"><button class="edit-event-button">Edit Event</button></a>
+            <a href="/delete/{{operation_date}}"><button class="delete-event-button">Delete Event</button></a>
         </div>
     </div>
     <a href="/"><button type="submit" class="delete-event-button">Back</button></a>
