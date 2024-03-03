@@ -140,6 +140,9 @@ def logout():
     flask_login.logout_user()
     return redirect('signin')
 
+@app.route('/back', methods=["GET"])
+def logout():
+    return redirect(flask.url_for('home'))
 @app.route("/")
 @flask_login.login_required
 def home():

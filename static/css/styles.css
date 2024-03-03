@@ -178,6 +178,7 @@ header .icons span:hover {
 
 .delete-event-button:hover {
     background-color: #C9302C; /* Darker shade of red on hover */
+    
 }
 
 .wrapper input[type="text"] {
