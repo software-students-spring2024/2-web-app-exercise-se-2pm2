@@ -11,4 +11,8 @@ We aim to build a calender containing remainder with day to day tasks for the us
 As a user, I want to use the calender to remind myself for upcoming tasks in life
 
 ## Task boards
-(https://github.com/orgs/software-students-spring2024/projects/10)https://github.com/orgs/software-students-spring2024/projects/10
+Sprint 1:
+https://github.com/orgs/software-students-spring2024/projects/10
+
+Sprint 2:
+https://github.com/orgs/software-students-spring2024/projects/48/
