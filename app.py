@@ -169,8 +169,8 @@ def home():
     print(see_docs)
     prevMonthDays, monthDays, nextMonthDays = getCalendarDates(today)
     monthDays[today] += ' active'
-
-    return render_template("index.html", docs = docs, month_year = month_year, prevDays = prevMonthDays.items(), monthDays = monthDays.items(), nextDays = nextMonthDays.items())
+    documents = list(db['tasks'].find({'username': username}, {'_id': 0}).limit(10))
+    return render_template("index.html", documents = documents, docs = docs, month_year = month_year, prevDays = prevMonthDays.items(), monthDays = monthDays.items(), nextDays = nextMonthDays.items())
 
 @app.route("/date/<date>")
 @flask_login.login_required
