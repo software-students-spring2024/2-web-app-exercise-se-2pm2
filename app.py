@@ -314,7 +314,7 @@ def add():
         return redirect(url_for('add'))
     # display add template
     documents = list(db['tasks'].find(
-        {'date': date, 'username': username}, {'_id': 0}))
+        {'username': username}, {'_id': 0}))
     return render_template('add.html', documents=documents)
 
 # delete_handler for specific dates
