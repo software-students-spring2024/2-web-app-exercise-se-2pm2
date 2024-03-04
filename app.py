@@ -368,7 +368,26 @@ def delete():
     # display delete template
     documents = list(db['tasks'].find({'username': username}, {'_id': 0}))
     return render_template('delete.html', documents=documents)
+@app.route("/deleteaccount", methods=['GET', 'POST'])
+@flask_login.login_required
+def delete_account():
+    if request.method == 'POST':
+        username = flask_login.current_user.id
 
+        # Delete all tasks associated with the user
+        db['tasks'].delete_many({'username': username})
+
+        # Delete the user account
+        db.user_collection.delete_one({'username': username})
+
+        # Logout the user
+        flask_login.logout_user()
+
+        # Redirect to sign-in page
+        return redirect(url_for('signin'))
+
+    # Display the delete account confirmation page
+    return render_template("deleteaccount.html")
 
 if __name__ == "__main__":
     FLASK_PORT = os.getenv("FLASK_PORT", "3000")
