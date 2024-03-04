@@ -119,7 +119,7 @@ def signin():
         #curr_user = db.user_collection.find({username: username})
         curr_user = db.user_collection.find_one({"username": username})
         if not curr_user or not check_password_hash(curr_user['password'], password):
-            error_message = "Username or password is incorrect."
+            error_message = "Username or password is wrong or does not exist."
             return render_template('signin.html', error_message=error_message)
         if  curr_user and check_password_hash(curr_user['password'], password):
             user = User(username)
@@ -156,7 +156,8 @@ def back():
 @app.route("/")
 @flask_login.login_required
 def home():
-    tasks = db.tasks.find().limit(10)
+    username = flask_login.current_user.id
+    tasks = db.tasks.find({'username':username}).limit(10)
     see_tasks = db.tasks.find()
     see_docs = [task['date'] for task in see_tasks]
     
@@ -191,7 +192,6 @@ def edit_for_specific_date(date):
 
     # POST handler
     if request.method == 'POST':
-
         # get form data
         taskId = int(request.form['taskId'])
         task = request.form['task']
@@ -209,11 +209,10 @@ def edit_for_specific_date(date):
 
 @app.route("/edit", methods=['GET', 'POST'])
 @flask_login.login_required
-def edit():
+def edit():    # POST handler
+    username = flask_login.current_user.id
 
-    # POST handler
     if request.method == 'POST':
-
         # get form data
         taskId = int(request.form['taskId'])
         task = request.form['task']
@@ -226,17 +225,18 @@ def edit():
         return redirect(url_for('edit'))
 
     # load the edit template
-    documents = list(db['tasks'].find({}, {'_id': 0}))
+    documents = list(db['tasks'].find({'username':username}))
     return render_template('edit.html', documents = documents) 
 
 @app.route("/search",  methods = ['GET','POST'])
 @flask_login.login_required
 def search():
+     username = flask_login.current_user.id
      query = request.form.get('query')
      results = []
      if query:
-        task_results = list(db.tasks.find({"task": {"$regex": query, "$options": "i"}} ))
-        data_results = list(db.tasks.find({"date":{"$regex": query, "$options": "i"}}))
+        task_results = list(db.tasks.find({"task": {"$regex": query, "$options": "i"}, "username": username}))
+        data_results = list(db.tasks.find({"date":{"$regex": query, "$options": "i"}, "username":username}))
         results = task_results+data_results
      return render_template("search.html", results=results)
 
@@ -247,6 +247,7 @@ def add_for_specific_date(date):
 
     # POST handler
     if request.method == 'POST':
+        username = flask_login.current_user.id
 
         #set taskId and increment the counter
         taskId = readCounter()
@@ -258,7 +259,7 @@ def add_for_specific_date(date):
         date = request.form['date']
 
         # update collection
-        db['tasks'].insert_one({'taskId': taskId, 'task': task, 'date': date})
+        db['tasks'].insert_one({'taskId': taskId, 'task': task, 'date': date, 'username':username})
 
         # refresh page
         return redirect(url_for('add_for_specific_date', date=date))
@@ -269,10 +270,9 @@ def add_for_specific_date(date):
 @app.route("/add", methods = ['GET', 'POST'])
 @flask_login.login_required
 def add():
-
+    username = flask_login.current_user.id
     # POST handler
     if request.method == 'POST':
-
         #set taskId and increment the counter
         taskId = readCounter()
         taskId += 1
@@ -283,12 +283,12 @@ def add():
         date = request.form['date']
 
         # update collection
-        db['tasks'].insert_one({'taskId': taskId, 'task': task, 'date': date})
+        db['tasks'].insert_one({'taskId': taskId, 'task': task, 'date': date, 'username':username})
 
         # refresh page
         return redirect(url_for('add'))
     # display add template
-    documents = list(db['tasks'].find({}, {'_id': 0}))
+    documents = list(db['tasks'].find({'username': username}, {'_id': 0}))
     return render_template('add.html', documents = documents)
 
 # delete_handler for specific dates
@@ -318,6 +318,7 @@ def delete_for_specific_date(date):
 @app.route("/delete", methods = ['GET', 'POST'])
 @flask_login.login_required
 def delete():
+    username = flask_login.current_user.id
 
     # POST handler
     if request.method == 'POST':
@@ -333,7 +334,7 @@ def delete():
         return redirect(url_for('delete'))
 
     # display delete template
-    documents = list(db['tasks'].find({}, {'_id': 0}))
+    documents = list(db['tasks'].find({'username': username}, {'_id': 0}))
     return render_template('delete.html', documents = documents) 
 
 
