@@ -61,12 +61,13 @@
         <header>
             <p class="todo-header">Todo List</p>
         </header>
-        <ul class="todo-list">
-            <li>Complete assignment</li>
-            <li>Prepare for meeting</li>
-            <li>Buy groceries</li>
-            <li>Call mom</li>
-        </ul>
+        <table style = "margin-left: 50px;">
+            {% for document in documents %}
+            <tr>
+                <td style ="font-size: large;  font-weight: bold;">{{ document.task }}</td>
+            </tr>
+            {% endfor %}
+        </table>
         <div class="button-container">
             <a href="/add">
                 <button class="add-event-button">Add Event</button>
