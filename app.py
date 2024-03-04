@@ -235,7 +235,9 @@ def search():
      query = request.form.get('query')
      results = []
      if query:
-        results = list(db.tasks.find({"task": {"$regex": query, "$options": "i"}}))
+        task_results = list(db.tasks.find({"task": {"$regex": query, "$options": "i"}} ))
+        data_results = list(db.tasks.find({"date":{"$regex": query, "$options": "i"}}))
+        results = task_results+data_results
      return render_template("search.html", results=results)
 
 # adding route handler
