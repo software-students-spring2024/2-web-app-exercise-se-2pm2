@@ -196,7 +196,7 @@ def edit_for_specific_date(date):
         taskId = int(request.form['taskId'])
         task = request.form['task']
         date = request.form['date']
-
+        
         # update collection
         db['tasks'].update_one({'taskId': taskId}, {'$set': {'task': task, 'date': date}})
 
@@ -219,7 +219,7 @@ def edit():    # POST handler
         date = request.form['date']
 
         # update collection
-        db['tasks'].update_one({'taskId': taskId}, {'$set': {'task': task, 'date': date}})
+        db['tasks'].update_one({'taskId': taskId, 'username': flask_login.current_user.id}, {'$set': {'task': task, 'date': date}})
 
         # refresh page
         return redirect(url_for('edit'))
@@ -328,7 +328,7 @@ def delete():
 
         # delete
         if taskId is not None:
-            db['tasks'].delete_one({'taskId': taskId})
+           db['tasks'].delete_one({'taskId': taskId, 'username': flask_login.current_user.id})
 
         # refresh
         return redirect(url_for('delete'))
