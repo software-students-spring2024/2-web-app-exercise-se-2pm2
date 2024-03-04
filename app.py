@@ -50,7 +50,8 @@ def getCalendarDates(date):
     last_year = prev_month.year
     last_month = prev_month.month
 
-    tasks = db.tasks.find()
+    username = flask_login.current_user.id
+    tasks = db.tasks.find({'username': username})
     event_dates = [task['date'] for task in tasks]
     
     # Get the number of days in the current month
@@ -74,8 +75,6 @@ def getCalendarDates(date):
             month_days[my_datetime] += ' event'
         elif my_datetime in next_month_days.keys():
             next_month_days[my_datetime] += ' event'
-    
-    print(next_month_days)
 
     return prev_month_days, month_days, next_month_days
 
@@ -115,8 +114,6 @@ def signin():
     if request.method == "POST":
         username = request.form['username']
         password = request.form["password"]
-        #search in database using find_one()
-        #curr_user = db.user_collection.find({username: username})
         curr_user = db.user_collection.find_one({"username": username})
         if not curr_user or not check_password_hash(curr_user['password'], password):
             error_message = "Username or password is wrong or does not exist."
@@ -158,15 +155,9 @@ def back():
 def home():
     username = flask_login.current_user.id
     tasks = db.tasks.find({'username':username}).limit(10)
-    see_tasks = db.tasks.find()
-    see_docs = [task['date'] for task in see_tasks]
-    
     docs = [task for task in tasks]
     today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
     month_year = today.strftime("%B %Y")
-    year = today.year
-    month = today.month
-    print(see_docs)
     prevMonthDays, monthDays, nextMonthDays = getCalendarDates(today)
     monthDays[today] += ' active'
     documents = list(db['tasks'].find({'username': username}, {'_id': 0}).limit(10))
@@ -175,11 +166,11 @@ def home():
 @app.route("/date/<date>")
 @flask_login.login_required
 def date_events(date):
-    
+    username = flask_login.current_user.id
     my_datetime = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
     data_date = str(my_datetime)
     data_date = data_date[:10]
-    docs = db['tasks'].find({"date": data_date})
+    docs = db['tasks'].find({"date": data_date, 'username': username})
     formated_date = my_datetime.strftime("%B %d %Y")
     return render_template("events.html", date=formated_date, docs=docs, operation_date=data_date)
 
@@ -189,7 +180,7 @@ def date_events(date):
 @app.route("/edit/<date>", methods=['GET', 'POST'])
 @flask_login.login_required
 def edit_for_specific_date(date):
-
+    username = flask_login.current_user.id
     # POST handler
     if request.method == 'POST':
         # get form data
@@ -204,7 +195,7 @@ def edit_for_specific_date(date):
         return redirect(url_for('edit_for_specific_date', date=date))
 
     # load the edit template
-    documents = list(db['tasks'].find({'date': date}, {'_id': 0}))
+    documents = list(db['tasks'].find({'date': date, 'username': username}, {'_id': 0}))
     return render_template('edit.html', documents = documents, date=date) 
 
 @app.route("/edit", methods=['GET', 'POST'])
@@ -244,10 +235,10 @@ def search():
 @app.route("/add/<date>", methods = ['GET', 'POST'])
 @flask_login.login_required
 def add_for_specific_date(date):
-
+    username = flask_login.current_user.id
     # POST handler
     if request.method == 'POST':
-        username = flask_login.current_user.id
+        
 
         #set taskId and increment the counter
         taskId = readCounter()
@@ -263,7 +254,7 @@ def add_for_specific_date(date):
 
         # refresh page
         return redirect(url_for('add_for_specific_date', date=date))
-    documents = list(db['tasks'].find({'date': date}, {'_id': 0}))
+    documents = list(db['tasks'].find({'date': date, 'username': username}, {'_id': 0}))
     # display add template
     return render_template('add.html', documents = documents, date=date)
 
@@ -288,7 +279,7 @@ def add():
         # refresh page
         return redirect(url_for('add'))
     # display add template
-    documents = list(db['tasks'].find({'username': username}, {'_id': 0}))
+    documents = list(db['tasks'].find({'date': date, 'username': username}, {'_id': 0}))
     return render_template('add.html', documents = documents)
 
 # delete_handler for specific dates
@@ -296,6 +287,7 @@ def add():
 @app.route("/delete/<date>", methods = ['GET', 'POST'])
 @flask_login.login_required
 def delete_for_specific_date(date):
+    username = flask_login.current_user.id
 
     # POST handler
     if request.method == 'POST':
@@ -311,7 +303,7 @@ def delete_for_specific_date(date):
         return redirect(url_for('delete_for_specific_date', date=date))
 
     # display delete template
-    documents = list(db['tasks'].find({'date': date}, {'_id': 0}))
+    documents = list(db['tasks'].find({'date': date, 'username': username}, {'_id': 0}))
     return render_template('delete.html', documents = documents, date=date) 
 
 # delete handler
